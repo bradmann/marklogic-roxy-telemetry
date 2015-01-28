@@ -1,5 +1,5 @@
 (:
-Copyright 2012 MarkLogic Corporation
+Copyright 2015 MarkLogic Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ declare variable $HTTP-OPTIONS :=
 	<options xmlns="xdmp:http">
 		<authentication>
 			<username>admin</username>
-			<password>ML1234</password>
+			<password>password</password>
 		</authentication>
 	</options>
 ;
@@ -39,8 +39,8 @@ declare variable $PORT := 8070;
 declare variable $AGE-LIMIT := xs:dayTimeDuration("P365D");
 (: Path to store telemetry data that has been removed from the DB. If empty, data is deleted permanently. :)
 declare variable $CLEANUP-LOCATION := "/tmp/";
-
-declare variable $DOCUMENT-COLLECTION := "orion-content";
+(: The collection that your documents are stored in. :)
+declare variable $DOCUMENT-COLLECTION := "documents";
 (: Reference to QName where document date is stored. :)
 declare variable $DOCUMENT-DATE-FIELD := cts:element-reference(xs:QName("edl:ingest-datetime"));
 
