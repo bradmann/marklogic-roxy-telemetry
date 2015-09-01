@@ -5,6 +5,8 @@ Telemetry is a MarkLogic Roxy Plugin that provides a simple means of capturing a
 - Metrics on the number of documents in the system over time
 - Metrics about the activities happening in the app, including the activity duration (elapsed time), overall activity over time, and the number of times each activity is performed over a specific timeframe
 
+![](https://lh3.googleusercontent.com/-aDZWdVHAjdY/VeUT4690qZI/AAAAAAABZiE/83fNlYBU0tY/s2048-Ic42/telemetry.png)
+
 ### Installation
 - Extract directly on top of your Roxy src directory.
 - Edit src/app/config/telemetry-config.xqy with your application-specific settings.
