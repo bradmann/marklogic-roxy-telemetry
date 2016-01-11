@@ -18,8 +18,8 @@ tl:track(xdmp:get-current-user(), $controller-path || ":" || $func || "." || $fo
   - ./deploy/ml-config.telemetry
 - Edit src/app/config/telemetry-config.xqy with your application-specific settings.
 - Re-deploy your application code using Roxy's deploy tasks:
-  - ./ml <env> bootstrap
-  - ./ml <env> deploy modules
+  - ./ml \<env\> bootstrap
+  - ./ml \<env\> deploy modules
 - Create a scheduled task with the following settings:
   - task path: /scheduled-tasks/collect-telemetry-data.xqy
   - task root: /
@@ -32,7 +32,7 @@ tl:track(xdmp:get-current-user(), $controller-path || ":" || $func || "." || $fo
   - task priority: normal
 
 ### Scheduled Task
-The scheduled task runs every hour and collects the user metrics and cleans up any metrics gathered older than age limit. [See AGE-LIMIT](#Telemetry Config File) 
+The scheduled task runs every hour and collects the user metrics and cleans up any metrics gathered older than age limit. [See AGE-LIMIT](#telemetry-config-file) 
 
 ### Telemetry Config File
 The ./app/config/telemetry-config.xqy file contains options used to customize the application to work within your target environment.  Below is a table containing some of the important/configurable settings:
