@@ -22,6 +22,8 @@ declare option xdmp:mapping "false";
   let $stuff := vh:get("stuff")
 :)
 
+declare variable $action-list := vh:get("action-list");
+
 '<!DOCTYPE html>',
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
   <head>
@@ -59,7 +61,7 @@ declare option xdmp:mapping "false";
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
           <ul class="nav navbar-nav">
             <li class="active"><a href="#tab1" data-toggle="tab">User Metrics</a></li>
-            <li><a href="#tab2" data-toggle="tab">Activity Metrics</a></li>
+            <li><a href="#tab2" data-toggle="tab">Request Metrics</a></li>
           </ul>
         </div><!-- /.navbar-collapse -->
       </div><!-- /.container-fluid -->
@@ -120,6 +122,18 @@ declare option xdmp:mapping "false";
               <option value="30">Last 30 days</option>
               <option value="90">Last 90 days</option>
               <option value="365">Last 365 days</option>
+            </select>
+          </div>
+          <div class="chart_wrapper">
+            <div id="action_timeseries_chart">
+            </div>
+            <select id="action_select" class="chart_select">
+            {
+              for $action in $action-list
+              let $action-name := fn:tokenize($action, "/")[fn:last()]
+              order by $action-name
+              return <option value="{$action}">{$action-name}</option>
+            }
             </select>
           </div>
           <div class="chart_wrapper">

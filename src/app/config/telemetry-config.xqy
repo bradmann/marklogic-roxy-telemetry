@@ -42,15 +42,18 @@ declare variable $CLEANUP-LOCATION := "/tmp/";
 (: The collection that your documents are stored in. :)
 declare variable $DOCUMENT-COLLECTION := "documents";
 (: Reference to QName where document date is stored. :)
-declare variable $DOCUMENT-DATE-FIELD := cts:element-reference(xs:QName("edl:ingest-datetime"));
+declare variable $DOCUMENT-TIME-REF := cts:element-reference(xs:QName("edl:ingest-datetime"));
 
 (: Don't change the variables below unless you know what you're doing. Changing these will require corresponding changes
    in telemetry-lib.xqy and controllers/telemetry.xqy.
 :)
 declare variable $TELEMETRY-COLLECTION := "telemetry";
 declare variable $TELEMETRY-URI-PREFIX := "/telemetry/";
-declare variable $TELEMETRY-TIME-REF := cts:element-attribute-reference(xs:QName("telemetry:data"), xs:QName("time"));
-declare variable $TELEMETRY-DURATION-REF := cts:element-attribute-reference(xs:QName("telemetry:data"), xs:QName("duration"));
-declare variable $TELEMETRY-USER-REF := cts:element-attribute-reference(xs:QName("telemetry:data"), xs:QName("user"));
-declare variable $TELEMETRY-ACTION-REF := cts:element-attribute-reference(xs:QName("telemetry:metrics"), xs:QName("action"));
-declare variable $TELEMETRY-ID-REF := cts:element-attribute-reference(xs:QName("telemetry:data"), xs:QName("id"));
+declare variable $TELEMETRY-ELEMENT-QNAME := xs:QName("telemetry:data");
+declare variable $TELEMETRY-FRAGMENT-QNAME := xs:QName("telemetry:metrics");
+declare variable $TELEMETRY-COLLATION := "collation=http://marklogic.com/collation/codepoint";
+declare variable $TELEMETRY-TIME-REF := cts:element-attribute-reference($TELEMETRY-ELEMENT-QNAME, xs:QName("time"));
+declare variable $TELEMETRY-DURATION-REF := cts:element-attribute-reference($TELEMETRY-ELEMENT-QNAME, xs:QName("duration"));
+declare variable $TELEMETRY-USER-REF := cts:element-attribute-reference($TELEMETRY-ELEMENT-QNAME, xs:QName("user"), $TELEMETRY-COLLATION);
+declare variable $TELEMETRY-ACTION-REF := cts:element-attribute-reference($TELEMETRY-FRAGMENT-QNAME, xs:QName("action"), $TELEMETRY-COLLATION);
+declare variable $TELEMETRY-ID-REF := cts:element-attribute-reference($TELEMETRY-ELEMENT-QNAME, xs:QName("id"));

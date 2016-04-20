@@ -3,12 +3,14 @@ $(document).ready(function() {
 	var actionSummaryView = "";
 	var docDateView = "";
 	var uniqueDetailView = "";
+	var actionTimeseriesView = "";
 
 	var uniqueUsersChartTitle = "Unique Users";
 	var docDateChartTitle = "Document Dates";
-	var actionSummaryChartTitle = "Activity Summary";
-	var actionCountChartTitle = "Activity Counts";
-	var actionDurationChartTitle = "Activity Durations";
+	var actionSummaryChartTitle = "Request Summary";
+	var actionCountChartTitle = "Request Counts";
+	var actionDurationChartTitle = "Request Durations";
+	var actionTimeseriesChartTitle = "Request Timeseries";
 
 	$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
 		if ($(e.target).text() == "User Metrics") {
@@ -17,10 +19,11 @@ $(document).ready(function() {
 			updateCharts('user');
 		}
 
-		if ($(e.target).text() == "Activity Metrics") {
+		if ($(e.target).text() == "Request Metrics") {
 			actionSummaryChart.setSize($('#action_summary_chart').width(), 400, false);
 			actionChart.setSize($('#action_chart').width(), 700, false);
 			actionTimeChart.setSize($('#action_time_chart').width(), 700, false);
+			actionTimeseriesChart.setSize($('#action_time_chart').width(), 700, false);
 			updateCharts('action');
 		}
 	});
@@ -47,6 +50,12 @@ $(document).ready(function() {
 		var duration = $(this).val();
 		$.cookie('action_time_duration_value', duration, { expires: 365, path: '/' });
 		updateActionTimeChart(duration);
+	});
+
+	$('#action_select').on('change', function(evt, ui) {
+		var action = $(this).val();
+		$.cookie('action_value', action, { expires: 365, path: '/' });
+		updateActionTimeseriesChart();
 	});
 
 	var actionSummaryChart = new Highcharts.Chart({
@@ -271,6 +280,60 @@ $(document).ready(function() {
 		},
 		series: []
     });
+
+    var actionTimeseriesChart = new Highcharts.Chart({
+		chart: {
+			type: 'column',
+			renderTo: 'action_timeseries_chart',
+			zoomType: 'x',
+			events: {
+				drilldown: function(e) {
+					if (!e.seriesOptions) {
+						var chart = this;
+						if (actionTimeseriesView == '') {
+							actionTimeseriesView = e.point.name.split(' ')[0] + '/' + e.point.name.split(' ')[1];
+						} else if (actionTimeseriesView.split('/').length == 2) {
+							actionTimeseriesView = actionTimeseriesView + '/' + e.point.name;
+						}
+						updateActionTimeseriesChart(e);
+					}
+				},
+				drillup: function(e) {
+					var chart = this;
+					var tokens = actionTimeseriesView.split('/');
+					actionTimeseriesView = (tokens.length == 2) ? '' : tokens.slice(0, -1).join('/');
+					var title = (actionTimeseriesView == '') ? '' : ' ' + actionTimeseriesView.split('/').join(' ');
+					chart.setTitle({text: 'Request Timeseries' + title});
+				}
+			}
+		},
+		title: {
+			text: actionTimeseriesChartTitle
+		},
+		xAxis: {
+			type: 'category',
+			labels: {
+				rotation: 45,
+				formatter: function() {
+					return this.value.split('T')[0];
+				}
+			}
+		},
+		yAxis: {
+			min: 0,
+			title: {
+				text: 'Requests'
+			},
+			allowDecimals: false
+		},
+		legend: {
+			enabled: false
+		},
+		series: [],
+		drilldown: {
+			series: []
+		}
+	});
 
 	function updateTopUsersChart(duration) {
 		$.ajax({
@@ -535,6 +598,53 @@ $(document).ready(function() {
 		});
 	};
 
+	function updateActionTimeseriesChart(evt) {
+		actionTimeseriesChart.showLoading('Loading');
+		$.ajax({
+			url: '../telemetry/getTelemetryCounts.json?view=' + actionTimeseriesView + '&action=' + $('#action_select').val(),
+			type: 'get',
+			success: function (data) {
+				actionTimeseriesChart.hideLoading();
+				if (!evt) {
+					while (actionTimeseriesChart.series.length > 0) {
+						actionTimeseriesChart.series[0].remove(true);
+					}
+				}
+				var drilldown = (actionTimeseriesView.split('/').length == 3) ? false : true;
+
+				var seriesdata = [];
+				for (var key in data) {
+					seriesdata.push({name: key, y: data[key], drilldown: drilldown});
+				}
+				seriesdata.sort((actionTimeseriesView == '') ? monthSort : itemSort);
+
+				var detailTitle = actionTimeseriesChartTitle + ' ' + actionTimeseriesView.split('/').join(' ');
+				if (actionTimeseriesView.split('/').length > 2) {
+					actionTimeseriesChart.xAxis[0].update({labels: {step: 1, formatter: function() {return this.value;}}});
+					actionTimeseriesChart.setTitle({'text': detailTitle});
+				} else if (actionTimeseriesView.split('/').length == 2) {
+					actionTimeseriesChart.xAxis[0].update({labels: {step: 1, formatter: function() {return this.value;}}});
+					actionTimeseriesChart.setTitle({'text': detailTitle});
+				} else if (actionTimeseriesView == '') {
+					actionTimeseriesChart.xAxis[0].update({
+						labels: {
+							step: 1, 
+							formatter: function() {
+								return this.value.split(' ')[1] + ' ' + this.value.split(' ')[0];
+							}
+						}
+					});
+					actionTimeseriesChart.setTitle({'text': actionTimeseriesChartTitle});
+				}
+				if (!evt) {
+					actionTimeseriesChart.addSeries({data: seriesdata, color: '#2f7ed8', name: actionTimeseriesChartTitle});
+				} else {
+					actionTimeseriesChart.addSeriesAsDrilldown(evt.point, {data: seriesdata, color: '#2f7ed8', name: detailTitle});
+				}
+			}
+		});
+	};
+
 	function updateCharts(charts) {
 		if (charts == 'user' || charts == null) {
 			var topusersDuration = $.cookie('topusers_duration_value');
@@ -552,10 +662,14 @@ $(document).ready(function() {
 			duration = duration ? duration : '1';
 			var timeduration = $.cookie('action_time_duration_value');
 			timeduration = timeduration ? timeduration : '1';
+			var action = $.cookie('action_value');
+			action = action ? action : $('#action_select').val();
 			$('#duration_select').val(duration);
+			$('#action_select').val(action);
 			updateActionSummaryChart();
 			updateActionChart(duration);
 			updateActionTimeChart(timeduration);
+			updateActionTimeseriesChart();
 		}
 	}
 

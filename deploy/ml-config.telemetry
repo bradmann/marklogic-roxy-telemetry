@@ -6,7 +6,6 @@
 			<scalar-type>dateTime</scalar-type>
 			<namespace-uri>http://marklogic.com/edl</namespace-uri>
 			<localname>ingest-datetime</localname>
-			<collation/>
 			<range-value-positions>false</range-value-positions>
 			<invalid-values>reject</invalid-values>
 		</range-element-index>
@@ -14,7 +13,7 @@
 	</range-element-indexes>
 
 	<range-element-attribute-indexes>
-			<range-element-attribute-index>
+		<range-element-attribute-index>
 			<scalar-type>dateTime</scalar-type>
 			<parent-namespace-uri>http://marklogic.com/telemetry</parent-namespace-uri>
 			<parent-localname>data</parent-localname>
@@ -36,7 +35,7 @@
 		</range-element-attribute-index>
 		<range-element-attribute-index>
 			<scalar-type>string</scalar-type>
-			<collation>http://marklogic.com/collation/</collation>
+			<collation>http://marklogic.com/collation/codepoint</collation>
 			<parent-namespace-uri>http://marklogic.com/telemetry</parent-namespace-uri>
 			<parent-localname>metrics</parent-localname>
 			<namespace-uri/>
@@ -46,7 +45,6 @@
 		</range-element-attribute-index>
 		<range-element-attribute-index>
 			<scalar-type>unsignedLong</scalar-type>
-			<collation/>
 			<parent-namespace-uri>http://marklogic.com/telemetry</parent-namespace-uri>
 			<parent-localname>data</parent-localname>
 			<namespace-uri/>
