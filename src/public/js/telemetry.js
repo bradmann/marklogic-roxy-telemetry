@@ -4,6 +4,7 @@ $(document).ready(function() {
 	var docDateView = "";
 	var uniqueDetailView = "";
 	var actionTimeseriesView = "";
+	var path_prefix = "../telemetry/";
 
 	var uniqueUsersChartTitle = "Unique Users";
 	var docDateChartTitle = "Document Dates";
@@ -31,7 +32,7 @@ $(document).ready(function() {
 	$('#timeframe_select').on('change', function(evt, ui) {
 		var timeframe = $(this).val();
 		$.cookie('requestcount_period_value', timeframe, { expires: 365, path: '/' });
-		updateActionSummaryChart(timeframe);
+		updateDrillableChart(null, actionSummaryChart);
 	});
 
 	$('#topusers_duration_select').on('change', function(evt, ui) {
@@ -55,7 +56,7 @@ $(document).ready(function() {
 	$('#action_select').on('change', function(evt, ui) {
 		var action = $(this).val();
 		$.cookie('action_value', action, { expires: 365, path: '/' });
-		updateActionTimeseriesChart();
+		updateDrillableChart(null, actionTimeseriesChart);
 	});
 
 	var actionSummaryChart = new Highcharts.Chart({
@@ -64,24 +65,8 @@ $(document).ready(function() {
 			renderTo: 'action_summary_chart',
 			zoomType: 'x',
 			events: {
-				drilldown: function(e) {
-					if (!e.seriesOptions) {
-						var chart = this;
-						if (actionSummaryView == '') {
-							actionSummaryView = e.point.name.split(' ')[0] + '/' + e.point.name.split(' ')[1];
-						} else if (actionSummaryView.split('/').length == 2) {
-							actionSummaryView = actionSummaryView + '/' + e.point.name;
-						}
-						updateActionSummaryChart(e);
-					}
-				},
-				drillup: function(e) {
-					var chart = this;
-					var tokens = actionSummaryView.split('/');
-					actionSummaryView = (tokens.length == 2) ? '' : tokens.slice(0, -1).join('/');
-					var title = (actionSummaryView == '') ? '' : ' ' + actionSummaryView.split('/').join(' ');
-					chart.setTitle({text: 'Actions' + title});
-				}
+				drilldown: drilldown,
+				drillup: drillup
 			}
 		},
 		title: {
@@ -109,7 +94,10 @@ $(document).ready(function() {
 		series: [],
 		drilldown: {
 			series: []
-		}
+		},
+		url: path_prefix + 'getTelemetryCounts.json?view=',
+		view: '',
+		titleText: actionSummaryChartTitle
 	});
 
 	var docDateChart = new Highcharts.Chart({
@@ -118,24 +106,8 @@ $(document).ready(function() {
 			renderTo: 'document_ingest_chart',
 			zoomType: 'x',
 			events: {
-				drilldown: function(e) {
-					if (!e.seriesOptions) {
-						var chart = this;
-						if (docDateView == '') {
-							docDateView = e.point.name.split(' ')[0] + '/' + e.point.name.split(' ')[1];
-						} else if (docDateView.split('/').length == 2) {
-							docDateView = docDateView + '/' + e.point.name;
-						}
-						updateDocumentIngestChart(e);
-					}
-				},
-				drillup: function(e) {
-					var chart = this;
-					var tokens = docDateView.split('/');
-					docDateView = (tokens.length == 2) ? '' : tokens.slice(0, -1).join('/');
-					var title = (docDateView == '') ? '' : ' ' + docDateView.split('/').join(' ');
-					chart.setTitle({text: 'Documents Ingested' + title});
-				}
+				drilldown: drilldown,
+				drillup: drillup
 			}
 		},
 		title: {
@@ -163,7 +135,10 @@ $(document).ready(function() {
 		series: [],
 		drilldown: {
 			series: []
-		}
+		},
+		url: path_prefix + 'getIngestCounts.json?view=',
+		view: '',
+		titleText: docDateChartTitle
 	});
 
 	var actionChart = new Highcharts.Chart({
@@ -203,24 +178,8 @@ $(document).ready(function() {
 			renderTo: 'unique_users_detail_chart',
 			zoomType: 'x',
 			events: {
-				drilldown: function(e) {
-					if (!e.seriesOptions) {
-						var chart = this;
-						if (uniqueDetailView == '') {
-							uniqueDetailView = e.point.name.split(' ')[0] + '/' + e.point.name.split(' ')[1];
-						} else if (uniqueDetailView.split('/').length == 2) {
-							uniqueDetailView = uniqueDetailView + '/' + e.point.name;
-						}
-						updateUniqueUsersDetailChart(e);
-					}
-				},
-				drillup: function(e) {
-					var chart = this;
-					var tokens = uniqueDetailView.split('/');
-					uniqueDetailView = (tokens.length == 2) ? '' : tokens.slice(0, -1).join('/');
-					var title = (uniqueDetailView == '') ? '' : ' ' + uniqueDetailView.split('/').join(' ');
-					chart.setTitle({text: uniqueUsersChartTitle + title});
-				}
+				drilldown: drilldown,
+				drillup: drillup
 			}
 		},
 		title: {
@@ -248,7 +207,10 @@ $(document).ready(function() {
 		series: [],
 		drilldown: {
 			series: []
-		}
+		},
+		url: path_prefix + 'getUserCounts.json?view=',
+		view: '',
+		titleText: uniqueUsersChartTitle
 	});
 
 	var actionTimeChart = new Highcharts.Chart({
@@ -287,24 +249,8 @@ $(document).ready(function() {
 			renderTo: 'action_timeseries_chart',
 			zoomType: 'x',
 			events: {
-				drilldown: function(e) {
-					if (!e.seriesOptions) {
-						var chart = this;
-						if (actionTimeseriesView == '') {
-							actionTimeseriesView = e.point.name.split(' ')[0] + '/' + e.point.name.split(' ')[1];
-						} else if (actionTimeseriesView.split('/').length == 2) {
-							actionTimeseriesView = actionTimeseriesView + '/' + e.point.name;
-						}
-						updateActionTimeseriesChart(e);
-					}
-				},
-				drillup: function(e) {
-					var chart = this;
-					var tokens = actionTimeseriesView.split('/');
-					actionTimeseriesView = (tokens.length == 2) ? '' : tokens.slice(0, -1).join('/');
-					var title = (actionTimeseriesView == '') ? '' : ' ' + actionTimeseriesView.split('/').join(' ');
-					chart.setTitle({text: 'Request Timeseries' + title});
-				}
+				drilldown: drilldown,
+				drillup: drillup
 			}
 		},
 		title: {
@@ -332,7 +278,14 @@ $(document).ready(function() {
 		series: [],
 		drilldown: {
 			series: []
-		}
+		},
+		url: function() {
+			return path_prefix + 'getTelemetryCounts.json?' +
+			'view=' + this.options.view +
+			'&action=' + $('#action_select').val();
+		},
+		view: '',
+		titleText: actionTimeseriesChartTitle
 	});
 
 	function updateTopUsersChart(duration) {
@@ -396,35 +349,56 @@ $(document).ready(function() {
 		return 0;
 	}
 
-	function updateUniqueUsersDetailChart(evt) {
-		uniqueDetailChart.showLoading('Loading');
+	function drilldown(e) {
+		if (!e.seriesOptions) {
+			var chart = e.target;
+			if (chart.options.view == '') {
+				chart.options.view = e.point.name.split(' ')[0] + '/' + e.point.name.split(' ')[1];
+			} else if (chart.options.view.split('/').length == 2) {
+				chart.options.view = chart.options.view + '/' + e.point.name;
+			}
+			updateDrillableChart(e, e.target);
+		}
+	}
+
+	function drillup(e) {
+		var chart = e.target;
+		var tokens = chart.options.view.split('/');
+		chart.options.view = (tokens.length == 2) ? '' : tokens.slice(0, -1).join('/');
+		var title = (chart.options.view == '') ? '' : ' ' + chart.options.view.split('/').join(' ');
+		chart.setTitle({text: chart.options.titleText + title});
+	}
+
+	function updateDrillableChart(evt, chart) {
+		chart.showLoading('Loading');
+		var url = $.isFunction(chart.options.url) ? chart.options.url.bind(chart)() : chart.options.url + chart.options.view;
 		$.ajax({
-			url: '../telemetry/getUserCounts.json?view=' + uniqueDetailView,
+			url: url,
 			type: 'get',
 			success: function (data) {
-				uniqueDetailChart.hideLoading();
+				chart.hideLoading();
 				if (!evt) {
-					while (uniqueDetailChart.series.length > 0) {
-						uniqueDetailChart.series[0].remove(true);
+					while (chart.series.length > 0) {
+						chart.series[0].remove(true);
 					}
 				}
-				var drilldown = (uniqueDetailView.split('/').length == 3) ? false : true;
+				var drilldown = (chart.options.view.split('/').length == 3) ? false : true;
 
 				var seriesdata = [];
 				for (var key in data) {
 					seriesdata.push({name: key, y: data[key], drilldown: drilldown});
 				}
-				seriesdata.sort((uniqueDetailView == '') ? monthSort : itemSort);
+				seriesdata.sort((chart.options.view == '') ? monthSort : itemSort);
 
-				var detailTitle = uniqueUsersChartTitle + ' ' + uniqueDetailView.split('/').join(' ');
-				if (uniqueDetailView.split('/').length > 2) {
-					uniqueDetailChart.xAxis[0].update({labels: {step: 1, formatter: function() {return this.value;}}});
-					uniqueDetailChart.setTitle({'text': detailTitle});
-				} else if (uniqueDetailView.split('/').length == 2) {
-					uniqueDetailChart.xAxis[0].update({labels: {step: 1, formatter: function() {return this.value;}}});
-					uniqueDetailChart.setTitle({'text': detailTitle});
-				} else if (uniqueDetailView == '') {
-					uniqueDetailChart.xAxis[0].update({
+				var detailTitle = chart.options.titleText + ' ' + chart.options.view.split('/').join(' ');
+				if (chart.options.view.split('/').length > 2) {
+					chart.xAxis[0].update({labels: {step: 1, formatter: function() {return this.value;}}});
+					chart.setTitle({'text': detailTitle});
+				} else if (chart.options.view.split('/').length == 2) {
+					chart.xAxis[0].update({labels: {step: 1, formatter: function() {return this.value;}}});
+					chart.setTitle({'text': detailTitle});
+				} else if (chart.options.view == '') {
+					chart.xAxis[0].update({
 						labels: {
 							step: 1, 
 							formatter: function() {
@@ -432,110 +406,16 @@ $(document).ready(function() {
 							}
 						}
 					});
-					uniqueDetailChart.setTitle({'text': uniqueUsersChartTitle});
+					chart.setTitle({'text': chart.options.titleText});
 				}
 				if (!evt) {
-					uniqueDetailChart.addSeries({data: seriesdata, color: '#2f7ed8', name: uniqueUsersChartTitle});
+					chart.addSeries({data: seriesdata, color: '#2f7ed8', name: chart.options.titleText});
 				} else {
-					uniqueDetailChart.addSeriesAsDrilldown(evt.point, {data: seriesdata, color: '#2f7ed8', name: detailTitle});
+					chart.addSeriesAsDrilldown(evt.point, {data: seriesdata, color: '#2f7ed8', name: detailTitle});
 				}
 			}
 		});
-	};
-
-	function updateActionSummaryChart(evt) {
-		actionSummaryChart.showLoading('Loading');
-		$.ajax({
-			url: '../telemetry/getTelemetryCounts.json?view=' + actionSummaryView,
-			type: 'get',
-			success: function (data) {
-				actionSummaryChart.hideLoading();
-				if (!evt) {
-					while (actionSummaryChart.series.length > 0) {
-						actionSummaryChart.series[0].remove(true);
-					}
-				}
-				var drilldown = (actionSummaryView.split('/').length == 3) ? false : true;
-
-				var seriesdata = [];
-				for (var key in data) {
-					seriesdata.push({name: key, y: data[key], drilldown: drilldown});
-				}
-				seriesdata.sort((actionSummaryView == '') ? monthSort : itemSort);
-
-				var detailTitle = actionSummaryChartTitle + ' ' + actionSummaryView.split('/').join(' ');
-				if (actionSummaryView.split('/').length > 2) {
-					actionSummaryChart.xAxis[0].update({labels: {step: 1, formatter: function() {return this.value;}}});
-					actionSummaryChart.setTitle({'text': detailTitle});
-				} else if (actionSummaryView.split('/').length == 2) {
-					actionSummaryChart.xAxis[0].update({labels: {step: 1, formatter: function() {return this.value;}}});
-					actionSummaryChart.setTitle({'text': detailTitle});
-				} else if (actionSummaryView == '') {
-					actionSummaryChart.xAxis[0].update({
-						labels: {
-							step: 1, 
-							formatter: function() {
-								return this.value.split(' ')[1] + ' ' + this.value.split(' ')[0];
-							}
-						}
-					});
-					actionSummaryChart.setTitle({'text': actionSummaryChartTitle});
-				}
-				if (!evt) {
-					actionSummaryChart.addSeries({data: seriesdata, color: '#2f7ed8', name: actionSummaryChartTitle});
-				} else {
-					actionSummaryChart.addSeriesAsDrilldown(evt.point, {data: seriesdata, color: '#2f7ed8', name: detailTitle});
-				}
-			}
-		});
-	};
-
-	function updateDocumentIngestChart(evt) {
-		docDateChart.showLoading('Loading');
-		$.ajax({
-			url: '../telemetry/getIngestCounts.json?view=' + docDateView,
-			type: 'get',
-			success: function (data) {
-				docDateChart.hideLoading();
-				if (!evt) {
-					while (docDateChart.series.length > 0) {
-						docDateChart.series[0].remove(true);
-					}
-				}
-				var drilldown = (docDateView.split('/').length == 3) ? false : true;
-
-				var seriesdata = [];
-				for (var key in data) {
-					seriesdata.push({name: key, y: data[key], drilldown: drilldown});
-				}
-				seriesdata.sort((docDateView == '') ? monthSort : itemSort);
-
-				var detailTitle = docDateChartTitle + ' ' + docDateView.split('/').join(' ');
-				if (docDateView.split('/').length > 2) {
-					docDateChart.xAxis[0].update({labels: {step: 1, formatter: function() {return this.value;}}});
-					docDateChart.setTitle({'text': detailTitle});
-				} else if (docDateView.split('/').length == 2) {
-					docDateChart.xAxis[0].update({labels: {step: 1, formatter: function() {return this.value;}}});
-					docDateChart.setTitle({'text': detailTitle});
-				} else if (docDateView == '') {
-					docDateChart.xAxis[0].update({
-						labels: {
-							step: 1, 
-							formatter: function() {
-								return this.value.split(' ')[1] + ' ' + this.value.split(' ')[0];
-							}
-						}
-					});
-					docDateChart.setTitle({'text': docDateChartTitle});
-				}
-				if (!evt) {
-					docDateChart.addSeries({data: seriesdata, color: '#2f7ed8', name: docDateChartTitle});
-				} else {
-					docDateChart.addSeriesAsDrilldown(evt.point, {data: seriesdata, color: '#2f7ed8', name: detailTitle});
-				}
-			}
-		});
-	};
+	}
 
 	function updateActionChart(duration) {
 		actionChart.showLoading('Loading');
@@ -564,7 +444,7 @@ $(document).ready(function() {
 				actionChart.addSeries({data: seriesdata, color: '#2f7ed8', name: actionCountChartTitle});
 			}
 		});
-	};
+	}
 
 	function updateActionTimeChart(duration) {
 		actionTimeChart.showLoading('Loading');
@@ -596,54 +476,7 @@ $(document).ready(function() {
 				actionTimeChart.addSeries({data: seriesdata, color: '#2f7ed8', name: actionDurationChartTitle});
 			}
 		});
-	};
-
-	function updateActionTimeseriesChart(evt) {
-		actionTimeseriesChart.showLoading('Loading');
-		$.ajax({
-			url: '../telemetry/getTelemetryCounts.json?view=' + actionTimeseriesView + '&action=' + $('#action_select').val(),
-			type: 'get',
-			success: function (data) {
-				actionTimeseriesChart.hideLoading();
-				if (!evt) {
-					while (actionTimeseriesChart.series.length > 0) {
-						actionTimeseriesChart.series[0].remove(true);
-					}
-				}
-				var drilldown = (actionTimeseriesView.split('/').length == 3) ? false : true;
-
-				var seriesdata = [];
-				for (var key in data) {
-					seriesdata.push({name: key, y: data[key], drilldown: drilldown});
-				}
-				seriesdata.sort((actionTimeseriesView == '') ? monthSort : itemSort);
-
-				var detailTitle = actionTimeseriesChartTitle + ' ' + actionTimeseriesView.split('/').join(' ');
-				if (actionTimeseriesView.split('/').length > 2) {
-					actionTimeseriesChart.xAxis[0].update({labels: {step: 1, formatter: function() {return this.value;}}});
-					actionTimeseriesChart.setTitle({'text': detailTitle});
-				} else if (actionTimeseriesView.split('/').length == 2) {
-					actionTimeseriesChart.xAxis[0].update({labels: {step: 1, formatter: function() {return this.value;}}});
-					actionTimeseriesChart.setTitle({'text': detailTitle});
-				} else if (actionTimeseriesView == '') {
-					actionTimeseriesChart.xAxis[0].update({
-						labels: {
-							step: 1, 
-							formatter: function() {
-								return this.value.split(' ')[1] + ' ' + this.value.split(' ')[0];
-							}
-						}
-					});
-					actionTimeseriesChart.setTitle({'text': actionTimeseriesChartTitle});
-				}
-				if (!evt) {
-					actionTimeseriesChart.addSeries({data: seriesdata, color: '#2f7ed8', name: actionTimeseriesChartTitle});
-				} else {
-					actionTimeseriesChart.addSeriesAsDrilldown(evt.point, {data: seriesdata, color: '#2f7ed8', name: detailTitle});
-				}
-			}
-		});
-	};
+	}
 
 	function updateCharts(charts) {
 		if (charts == 'user' || charts == null) {
@@ -652,8 +485,8 @@ $(document).ready(function() {
 			
 			$('#topusers_duration_select').val(topusersDuration);
 
-			updateUniqueUsersDetailChart();
-			updateDocumentIngestChart();
+			updateDrillableChart(null, uniqueDetailChart);
+			updateDrillableChart(null, docDateChart);
 			updateTopUsersChart(topusersDuration);
 		}
 
@@ -666,10 +499,10 @@ $(document).ready(function() {
 			action = action ? action : $('#action_select').val();
 			$('#duration_select').val(duration);
 			$('#action_select').val(action);
-			updateActionSummaryChart();
+			updateDrillableChart(null, actionSummaryChart);
 			updateActionChart(duration);
 			updateActionTimeChart(timeduration);
-			updateActionTimeseriesChart();
+			updateDrillableChart(null, actionTimeseriesChart);
 		}
 	}
 
